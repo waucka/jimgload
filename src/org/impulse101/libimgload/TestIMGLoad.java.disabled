@@ -1,0 +1,28 @@
+package org.impulse101.libimgload;
+
+import java.nio.ByteBuffer;
+
+public class TestIMGLoad {
+    public static void main(String[] args) {
+	{
+	    System.out.print("Loading image: ");
+	    System.out.println(args[0]);
+	    ByteBuffer bb = IMGLoad.loadImage(args[0]);
+	    if (bb != null) {
+		System.out.println("Worked, I guess.");
+	    } else {
+		System.out.println("FAIL!");
+	    }
+	}
+	{
+	    System.out.print("Loading image: ");
+	    System.out.println(args[1]);
+	    ByteBuffer bb = IMGLoad.loadImage(args[1]);
+	    if (bb != null) {
+		System.out.println("Worked, I guess.");
+	    } else {
+		System.out.println("FAIL!");
+	    }
+	}
+    }
+}

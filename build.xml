@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="libimgload" default="default" basedir=".">
+  <description>Builds the libimgload project</description>
+
+  <property name="src.dir" value="src" />
+
+  <property name="build.dir" value="build" />
+  <property name="classes.dir" value="${build.dir}/classes" />
+  <property name="jar.dir" value="${build.dir}/jar" />
+
+  <property name="make.exe" value="make" />
+
+  <target name="clean">
+    <delete dir="${build.dir}" />
+    <exec executable="${make.exe}" failonerror="true">
+      <arg value="-f" />
+      <arg value="jni/GNUmakefile" />
+      <arg value="clean" />
+    </exec>
+  </target>
+
+  <target name="native-compile">
+    <exec executable="${make.exe}" failonerror="true">
+      <arg value="-f" />
+      <arg value="jni/GNUmakefile" />
+    </exec>
+  </target>
+
+  <target name="compile" depends="native-compile">
+    <mkdir dir="${classes.dir}" />
+    <javac srcdir="src" destdir="${classes.dir}" />
+  </target>
+
+  <target name="jar" depends="compile">
+    <mkdir dir="${jar.dir}" />
+    <jar destfile="${jar.dir}/IMGLoad.jar" basedir="${classes.dir}">
+    </jar>
+  </target>
+</project>
