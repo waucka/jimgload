@@ -50,6 +50,7 @@
     <java classpath="${classes.dir}:${test.dir}" classname="TestIMGLoad" fork="true">
       <arg value="petra.png" />
       <arg value="bobjagendorf_frozen.jpg" />
+      <arg value="totem-tv.png" />
       <jvmarg value="-Djava.library.path=${native.dir}" />
     </java>
   </target>

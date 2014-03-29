@@ -1,4 +1,5 @@
 jni/IMGLoad.h
+hs_err_pid*
 *.jar
 *.class
 *.so

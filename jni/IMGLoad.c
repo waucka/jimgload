@@ -21,8 +21,8 @@ unsigned char png_magic[] = { 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a };
 size_t png_magic_length = 8;
 
 int get_file_type(FILE* fp);
-jobject load_png(JNIEnv* env, FILE* fp, const char* filename, int* width, int* height);
-jobject load_jpg(JNIEnv* env, FILE* fp, const char* filename, int* width, int* height);
+jobject load_png(JNIEnv* env, FILE* fp, const char* filename, int* width, int* height, int* bpp);
+jobject load_jpg(JNIEnv* env, FILE* fp, const char* filename, int* width, int* height, int* bpp);
 
 JNIEXPORT jobject JNICALL Java_org_impulse101_libimgload_IMGLoad_loadImage(JNIEnv* env, jclass c, jstring filename) {
   jobject ret = 0;
@@ -33,23 +33,24 @@ JNIEXPORT jobject JNICALL Java_org_impulse101_libimgload_IMGLoad_loadImage(JNIEn
     goto cleanup_minimal;
   }
   jobject bb = 0;
-  int width;
-  int height;
+  int width = 0;
+  int height = 0;
+  int bpp = 0;
   int file_type = get_file_type(fp);
   switch(file_type) {
   case FILE_TYPE_PNG:
-    bb = load_png(env, fp, native_filename, &width, &height);
+    bb = load_png(env, fp, native_filename, &width, &height, &bpp);
     break;
   case FILE_TYPE_JPG:
-    bb = load_jpg(env, fp, native_filename, &width, &height);
+    bb = load_jpg(env, fp, native_filename, &width, &height, &bpp);
     break;
   default:
     fprintf(stderr, "Unrecognized file type for %s\n", native_filename);
     goto cleanup_file;
   }
   jclass cls = (*env)->FindClass(env, "org/impulse101/libimgload/Image");
-  jmethodID constructor = (*env)->GetMethodID(env, cls, "<init>", "(Ljava/nio/ByteBuffer;II)V");
-  ret = (*env)->NewObject(env, cls, constructor, bb, width, height);
+  jmethodID constructor = (*env)->GetMethodID(env, cls, "<init>", "(Ljava/nio/ByteBuffer;III)V");
+  ret = (*env)->NewObject(env, cls, constructor, bb, width, height, bpp);
  cleanup_file:
   fclose(fp);
  cleanup_minimal:
@@ -78,7 +79,7 @@ int get_file_type(FILE* fp) {
   return FILE_TYPE_INVALID;
 }
 
-jobject load_png(JNIEnv* env, FILE* fp, const char* filename, int* width, int* height) {
+jobject load_png(JNIEnv* env, FILE* fp, const char* filename, int* width, int* height, int* bpp) {
   unsigned char header[8];
 
   fread(header, 1, 8, fp);
@@ -147,6 +148,12 @@ jobject load_png(JNIEnv* env, FILE* fp, const char* filename, int* width, int* h
     return 0;
   }
 
+  if(color_type == PNG_COLOR_TYPE_RGB) {
+    *bpp = 24;
+  } else if(color_type == PNG_COLOR_TYPE_RGB_ALPHA) {
+    *bpp = 32;
+  }
+
   png_bytep* row_pointers = png_malloc(png_ptr, sizeof(png_bytep) * (*height));
   size_t rowbytes = png_get_rowbytes(png_ptr, info_ptr);
   int y;
@@ -163,7 +170,7 @@ jobject load_png(JNIEnv* env, FILE* fp, const char* filename, int* width, int* h
 
   unsigned char* bb_data = (*env)->GetDirectBufferAddress(env, bb);
   for(y = 0; y < *height; y++) {
-    memcpy(bb_data + y, row_pointers[y], rowbytes);
+    memcpy(bb_data + y * rowbytes, row_pointers[y], rowbytes);
   }
 
   for(y = 0; y < *height; y++) {
@@ -175,7 +182,7 @@ jobject load_png(JNIEnv* env, FILE* fp, const char* filename, int* width, int* h
   return bb;
 }
 
-jobject load_jpg(JNIEnv* env, FILE* fp, const char* filename, int* width, int* height) {
+jobject load_jpg(JNIEnv* env, FILE* fp, const char* filename, int* width, int* height, int* bpp) {
   struct jpeg_decompress_struct cinfo;
   struct jpeg_error_mgr jerr;
   //JSAMPROW row_pointer[1];
@@ -207,6 +214,7 @@ jobject load_jpg(JNIEnv* env, FILE* fp, const char* filename, int* width, int* h
 
   jpeg_finish_decompress(&cinfo);
   jpeg_destroy_decompress(&cinfo);
+  *bpp = 24;
 
   return bb;
 }
