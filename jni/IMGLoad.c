@@ -21,10 +21,10 @@ unsigned char png_magic[] = { 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a };
 size_t png_magic_length = 8;
 
 int get_file_type(FILE* fp);
-jobject load_png(JNIEnv* env, FILE* fp, const char* filename);
-jobject load_jpg(JNIEnv* env, FILE* fp, const char* filename);
+jobject load_png(JNIEnv* env, FILE* fp, const char* filename, int* width, int* height);
+jobject load_jpg(JNIEnv* env, FILE* fp, const char* filename, int* width, int* height);
 
-JNIEXPORT jobject JNICALL Java_IMGLoad_loadImage(JNIEnv* env, jclass c, jstring filename) {
+JNIEXPORT jobject JNICALL Java_org_impulse101_libimgload_IMGLoad_loadImage(JNIEnv* env, jclass c, jstring filename) {
   jobject ret = 0;
   const char* native_filename = (*env)->GetStringUTFChars(env, filename, 0);
   FILE* fp = fopen(native_filename, "rb");
@@ -32,18 +32,25 @@ JNIEXPORT jobject JNICALL Java_IMGLoad_loadImage(JNIEnv* env, jclass c, jstring 
     fprintf(stderr, "Could not open file %s\n", native_filename);
     goto cleanup_minimal;
   }
+  jobject bb = 0;
+  int width;
+  int height;
   int file_type = get_file_type(fp);
   switch(file_type) {
   case FILE_TYPE_PNG:
-    ret = load_png(env, fp, native_filename);
+    bb = load_png(env, fp, native_filename, &width, &height);
     break;
   case FILE_TYPE_JPG:
-    ret = load_jpg(env, fp, native_filename);
+    bb = load_jpg(env, fp, native_filename, &width, &height);
     break;
   default:
     fprintf(stderr, "Unrecognized file type for %s\n", native_filename);
-    break;
+    goto cleanup_file;
   }
+  jclass cls = (*env)->FindClass(env, "org/impulse101/libimgload/Image");
+  jmethodID constructor = (*env)->GetMethodID(env, cls, "<init>", "(Ljava/nio/ByteBuffer;II)V");
+  ret = (*env)->NewObject(env, cls, constructor, bb, width, height);
+ cleanup_file:
   fclose(fp);
  cleanup_minimal:
   (*env)->ReleaseStringUTFChars(env, filename, native_filename);
@@ -53,7 +60,7 @@ JNIEXPORT jobject JNICALL Java_IMGLoad_loadImage(JNIEnv* env, jclass c, jstring 
 int get_file_type(FILE* fp) {
   unsigned char buffer[8];
   size_t bytes_read = fread(buffer, 1, 8, fp);
-  fprintf(stderr, "File magic: %x:%x:%x:%x:%x:%x:%x:%x\n",
+  /*fprintf(stderr, "File magic: %x:%x:%x:%x:%x:%x:%x:%x\n",
 	  buffer[0],
 	  buffer[1],
 	  buffer[2],
@@ -61,7 +68,7 @@ int get_file_type(FILE* fp) {
 	  buffer[4],
 	  buffer[5],
 	  buffer[6],
-	  buffer[7]);
+	  buffer[7]);*/
   fseek(fp, 0L, SEEK_SET);
   if(bytes_read >= png_magic_length && memcmp(buffer, png_magic, png_magic_length) == 0) {
     return FILE_TYPE_PNG;
@@ -71,7 +78,7 @@ int get_file_type(FILE* fp) {
   return FILE_TYPE_INVALID;
 }
 
-jobject load_png(JNIEnv* env, FILE* fp, const char* filename) {
+jobject load_png(JNIEnv* env, FILE* fp, const char* filename, int* width, int* height) {
   unsigned char header[8];
 
   fread(header, 1, 8, fp);
@@ -120,8 +127,8 @@ jobject load_png(JNIEnv* env, FILE* fp, const char* filename) {
 
   png_read_info(png_ptr, info_ptr);
 
-  //int width = png_get_image_width(png_ptr, info_ptr);
-  int height = png_get_image_height(png_ptr, info_ptr);
+  *width = png_get_image_width(png_ptr, info_ptr);
+  *height = png_get_image_height(png_ptr, info_ptr);
 
   png_byte color_type = png_get_color_type(png_ptr, info_ptr);
   png_byte bit_depth = png_get_bit_depth(png_ptr, info_ptr);
@@ -140,10 +147,10 @@ jobject load_png(JNIEnv* env, FILE* fp, const char* filename) {
     return 0;
   }
 
-  png_bytep* row_pointers = png_malloc(png_ptr, sizeof(png_bytep) * height);
+  png_bytep* row_pointers = png_malloc(png_ptr, sizeof(png_bytep) * (*height));
   size_t rowbytes = png_get_rowbytes(png_ptr, info_ptr);
   int y;
-  for(y = 0; y < height; y++) {
+  for(y = 0; y < *height; y++) {
     row_pointers[y] = png_malloc(png_ptr, rowbytes);
   }
 
@@ -152,14 +159,14 @@ jobject load_png(JNIEnv* env, FILE* fp, const char* filename) {
 
   jclass cls = (*env)->FindClass(env, "java/nio/ByteBuffer");
   jmethodID aloc = (*env)->GetStaticMethodID(env, cls, "allocateDirect", "(I)Ljava/nio/ByteBuffer;");
-  jobject bb = (*env)->CallStaticObjectMethod(env, cls, aloc, height * rowbytes);
+  jobject bb = (*env)->CallStaticObjectMethod(env, cls, aloc, (*height) * rowbytes);
 
   unsigned char* bb_data = (*env)->GetDirectBufferAddress(env, bb);
-  for(y = 0; y < height; y++) {
+  for(y = 0; y < *height; y++) {
     memcpy(bb_data + y, row_pointers[y], rowbytes);
   }
 
-  for(y = 0; y < height; y++) {
+  for(y = 0; y < *height; y++) {
     png_free(png_ptr, row_pointers[y]);
   }
   png_free(png_ptr, row_pointers);
@@ -168,7 +175,7 @@ jobject load_png(JNIEnv* env, FILE* fp, const char* filename) {
   return bb;
 }
 
-jobject load_jpg(JNIEnv* env, FILE* fp, const char* filename) {
+jobject load_jpg(JNIEnv* env, FILE* fp, const char* filename, int* width, int* height) {
   struct jpeg_decompress_struct cinfo;
   struct jpeg_error_mgr jerr;
   //JSAMPROW row_pointer[1];
@@ -178,6 +185,9 @@ jobject load_jpg(JNIEnv* env, FILE* fp, const char* filename) {
   jpeg_stdio_src(&cinfo, fp);
   jpeg_read_header(&cinfo, 1);
   jpeg_start_decompress(&cinfo);
+
+  *width = cinfo.output_width;
+  *height = cinfo.output_height;
 
   jclass cls = (*env)->FindClass(env, "java/nio/ByteBuffer");
   jmethodID aloc = (*env)->GetStaticMethodID(env, cls, "allocateDirect", "(I)Ljava/nio/ByteBuffer;");

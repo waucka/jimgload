@@ -3,11 +3,13 @@
   <description>Builds the libimgload project</description>
 
   <property name="src.dir" value="src" />
+  <property name="test.src.dir" value="test" />
 
   <property name="build.dir" value="build" />
   <property name="classes.dir" value="${build.dir}/classes" />
   <property name="jar.dir" value="${build.dir}/jar" />
   <property name="native.dir" value="${build.dir}/native" />
+  <property name="test.dir" value="${build.dir}/test" />
 
   <property name="make.exe" value="make" />
 
@@ -21,7 +23,10 @@
     </exec>
   </target>
 
-  <target name="native-compile">
+  <target name="compile" depends="native-compile,compile-java">
+  </target>
+
+  <target name="native-compile" depends="compile-java">
     <mkdir dir="${native.dir}" />
     <exec executable="${make.exe}" failonerror="true" dir="jni">
       <arg value="BUILD_DIR=../${native.dir}" />
@@ -30,9 +35,23 @@
     </exec>
   </target>
 
-  <target name="compile" depends="native-compile">
+  <target name="compile-java">
     <mkdir dir="${classes.dir}" />
-    <javac srcdir="src" destdir="${classes.dir}" includeAntRuntime="false"/>
+    <javac srcdir="${src.dir}" destdir="${classes.dir}" includeAntRuntime="false" />
+    <javah outputFile="jni/IMGLoad.h" class="org.impulse101.libimgload.IMGLoad" classpath="${classes.dir}" />
+  </target>
+
+  <target name="compile-test">
+    <mkdir dir="${test.dir}" />
+    <javac srcdir="${test.src.dir}" destdir="${test.dir}" includeAntRuntime="false" classpath="${classes.dir}" />
+  </target>
+
+  <target name="test" depends="compile,compile-test">
+    <java classpath="${classes.dir}:${test.dir}" classname="TestIMGLoad" fork="true">
+      <arg value="petra.png" />
+      <arg value="bobjagendorf_frozen.jpg" />
+      <jvmarg value="-Djava.library.path=${native.dir}" />
+    </java>
   </target>
 
   <target name="jar" depends="compile">
