@@ -13,6 +13,8 @@
 
   <property name="make.exe" value="make" />
 
+  <property name="remote.repo" value="" />
+
   <target name="clean">
     <delete dir="${build.dir}" />
     <exec executable="${make.exe}" failonerror="true" dir="jni">
@@ -64,7 +66,7 @@
   <target name="deploy" depends="jar">
     <artifact:pom id="jimgload-pom" file="pom.xml" />
     <artifact:deploy file="${jar.dir}/IMGLoad.jar">
-      <remoteRepository url="file:///home/alex/mvn-repo" />
+      <remoteRepository url="${remote.repo}" />
       <pom refid="jimgload-pom" />
     </artifact:deploy>
   </target>
