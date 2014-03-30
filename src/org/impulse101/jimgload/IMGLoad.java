@@ -4,6 +4,6 @@ public class IMGLoad {
     public static native Image loadImage(String filename);
 
     static {
-	System.loadLibrary("imgload");
+	System.loadLibrary("jimgload");
     }
 }
