@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="libimgload" default="default" basedir="."  xmlns:artifact="antlib:org.apache.maven.artifact.ant">
-  <description>Builds the libimgload project</description>
+<project name="jimgload" default="default" basedir="."  xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+  <description>Builds the jimgload project</description>
 
   <property name="src.dir" value="src" />
   <property name="test.src.dir" value="test" />
@@ -38,7 +38,7 @@
   <target name="compile-java">
     <mkdir dir="${classes.dir}" />
     <javac srcdir="${src.dir}" destdir="${classes.dir}" includeAntRuntime="false" />
-    <javah outputFile="jni/IMGLoad.h" class="org.impulse101.libimgload.IMGLoad" classpath="${classes.dir}" />
+    <javah outputFile="jni/IMGLoad.h" class="org.impulse101.jimgload.IMGLoad" classpath="${classes.dir}" />
   </target>
 
   <target name="compile-test">
@@ -62,10 +62,10 @@
   </target>
 
   <target name="deploy" depends="jar">
-    <artifact:pom id="libimgload-pom" file="pom.xml" />
+    <artifact:pom id="jimgload-pom" file="pom.xml" />
     <artifact:deploy file="${jar.dir}/IMGLoad.jar">
       <remoteRepository url="file:///home/alex/mvn-repo" />
-      <pom refid="libimgload-pom" />
+      <pom refid="jimgload-pom" />
     </artifact:deploy>
   </target>
 </project>

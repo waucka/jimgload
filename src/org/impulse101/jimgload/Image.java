@@ -1,4 +1,4 @@
-package org.impulse101.libimgload;
+package org.impulse101.jimgload;
 
 import java.nio.ByteBuffer;
 

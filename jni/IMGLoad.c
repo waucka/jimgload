@@ -24,7 +24,7 @@ int get_file_type(FILE* fp);
 jobject load_png(JNIEnv* env, FILE* fp, const char* filename, int* width, int* height, int* bpp);
 jobject load_jpg(JNIEnv* env, FILE* fp, const char* filename, int* width, int* height, int* bpp);
 
-JNIEXPORT jobject JNICALL Java_org_impulse101_libimgload_IMGLoad_loadImage(JNIEnv* env, jclass c, jstring filename) {
+JNIEXPORT jobject JNICALL Java_org_impulse101_jimgload_IMGLoad_loadImage(JNIEnv* env, jclass c, jstring filename) {
   jobject ret = 0;
   const char* native_filename = (*env)->GetStringUTFChars(env, filename, 0);
   FILE* fp = fopen(native_filename, "rb");
@@ -48,7 +48,7 @@ JNIEXPORT jobject JNICALL Java_org_impulse101_libimgload_IMGLoad_loadImage(JNIEn
     fprintf(stderr, "Unrecognized file type for %s\n", native_filename);
     goto cleanup_file;
   }
-  jclass cls = (*env)->FindClass(env, "org/impulse101/libimgload/Image");
+  jclass cls = (*env)->FindClass(env, "org/impulse101/jimgload/Image");
   jmethodID constructor = (*env)->GetMethodID(env, cls, "<init>", "(Ljava/nio/ByteBuffer;III)V");
   ret = (*env)->NewObject(env, cls, constructor, bb, width, height, bpp);
  cleanup_file:

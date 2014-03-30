@@ -1,5 +1,5 @@
-import org.impulse101.libimgload.IMGLoad;
-import org.impulse101.libimgload.Image;
+import org.impulse101.jimgload.IMGLoad;
+import org.impulse101.jimgload.Image;
 import java.nio.ByteBuffer;
 
 public class TestIMGLoad {
