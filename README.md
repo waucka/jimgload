@@ -38,10 +38,8 @@ way to do this is to run with `-Djava.library.path=$whatever`.
 # Portability
 
 I want this to work on Linux, Windows, and OS X.  However, it currently only works on Linux.
-To fix this, additional cleverness will be needed in [jni/GNUmakefile][1].  A separate makefile
+To fix this, additional cleverness will be needed in [jni/GNUmakefile](jni/GNUmakefile).  A separate makefile
 for Windows may also be necessary.  Or, perhaps using CMake would be a better idea.  I'm not sure.
-
-[1] https://github.com/waucka/jimgload/blob/master/jni/GNUmakefile
 
 # License
 
