@@ -10,6 +10,10 @@ jimgload is a fairly simple library for loading images (currently PNG or JPEG) i
 
 # Building
 
+Before you do anything else, you need to set `$JAVA_HOME`.  On a Debian/Ubuntu-type system, this
+is typically `/usr/lib/jvm/default-java`.  `$JAVA_HOME/include` is where the build system expects
+to find `jni.h`.
+
 Run `ant -p` to see the list of targets.  Currently, these are:
 
 * `clean`: removes compiled files
@@ -30,6 +34,14 @@ compiled test code is in `build/test`.
 
 When running, `libjimgload.so` needs to be on `java.library.path`.  The most straightforward
 way to do this is to run with `-Djava.library.path=$whatever`.
+
+# Portability
+
+I want this to work on Linux, Windows, and OS X.  However, it currently only works on Linux.
+To fix this, additional cleverness will be needed in [jni/GNUmakefile][1].  A separate makefile
+for Windows may also be necessary.  Or, perhaps using CMake would be a better idea.  I'm not sure.
+
+[1] https://github.com/waucka/jimgload/blob/master/jni/GNUmakefile
 
 # License
 
