@@ -4,7 +4,7 @@
 
   <groupId>org.impulse101</groupId>
   <artifactId>jimgload</artifactId>
-  <version>1.3</version>
+  <version>1.0.0</version>
   <packaging>jar</packaging>
 
   <name>jimgload</name>
