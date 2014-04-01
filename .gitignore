@@ -1,4 +1,5 @@
 jni/IMGLoad.h
+jni/GNUmakefile
 hs_err_pid*
 *.jar
 *.class

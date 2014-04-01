@@ -1,8 +1,12 @@
 all: libjimgload.so
 libjimgload.so: IMGLoad.c IMGLoad.h
-	$(CC) -o $(BUILD_DIR)/libjimgload.so -shared -fPIC -Wall -Werror -I $(JAVA_HOME)/include IMGLoad.c -l{libpng} -ljpeg
+	$(CC) -o $(BUILD_DIR)/libjimgload.so -shared -fPIC -Wall -Werror -I{jdk}/include -I{dep_includedir} -I{libpng_includedir} IMGLoad.c -L{dep_libdir} -l{libpng} -ljpeg
 
 clean:
 	rm -f *~ $(BUILD_DIR)/libjimgload.so
+
+install:
+	mkdir -p {libdir}
+	install -m 0644 $(BUILD_DIR)/libjimgload.so {libdir}/libjimgload.so
 
 .PHONY: all clean

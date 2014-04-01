@@ -7,21 +7,18 @@ jimgload is a fairly simple library for loading images (currently PNG or JPEG) i
 * libpng 1.2 or 1.6
 * libjpeg-turbo 1.3
 * JNI
-* Python 2 (compile-time only)
+* Python 2.7 (compile-time only)
 
 # Building
 
 IF YOU ARE USING ARCH LINUX: Arch does not have a critical symlink in the same directory as `jni.h`
 (in `/usr/lib/jvm/java-7-openjdk/include` on my system).  Basically, `jni.h` references `jni_md.h`,
-but it does so with quotes instead of angle brackets, and the directory `jni_md.h` is in (`include/linux`)
+but it does so with quotes instead of angle brackets, and `jni_md.h` is in `include/linux`, which
 probably isn't in your include path anyway.  So, you need a symlink to `jni_md.h` in the same
 directory as `jni.h`.
 
-Before you do anything else, you need to set `$JAVA_HOME`.  On a Debian/Ubuntu-type system, this
-is typically `/usr/lib/jvm/default-java`.  `$JAVA_HOME/include` is where the build system expects
-to find `jni.h`.
-
-Run `./configure.py`.  This will set up `jni/GNUmakefile` correctly.
+Run `./configure.py --jdk=/path/to/java_home`.  This will set up `jni/GNUmakefile` correctly.
+Run `./configure.py --help` for the full set of options.
 
 Run `ant -p` to see the list of targets.  Currently, these are:
 
@@ -43,6 +40,14 @@ compiled test code is in `build/test`.
 
 When running, `libjimgload.so` needs to be on `java.library.path`.  The most straightforward
 way to do this is to run with `-Djava.library.path=$whatever`.
+
+If you want to install with `ant install`, use `-Djar.install.dir=$whatever`.  This option is
+probably most useful for distribution packagers.
+
+To deploy to a local Maven repository (useful for Clojure development), use `ant -Dremote.repo=$whatever deploy`.
+If you do this, you will need to copy `libjimgload.so` yourself.
+
+Any improvements to the build system are VERY welcome.  I'd like the whole thing to be very simple for the user.
 
 # Portability
 

@@ -14,6 +14,7 @@
   <property name="make.exe" value="make" />
 
   <property name="remote.repo" value="" />
+  <property name="jar.install.dir" value="" />
 
   <target name="clean">
     <delete dir="${build.dir}" />
@@ -69,5 +70,16 @@
       <remoteRepository url="${remote.repo}" />
       <pom refid="jimgload-pom" />
     </artifact:deploy>
+  </target>
+
+  <target name="install" depends="jar">
+    <mkdir dir="${jar.install.dir}" />
+    <copy file="${jar.dir}/IMGLoad.jar" todir="${jar.install.dir}" />
+    <exec executable="${make.exe}" failonerror="true" dir="jni">
+      <arg value="BUILD_DIR=../${native.dir}" />
+      <arg value="-f" />
+      <arg value="GNUmakefile" />
+      <arg value="install" />
+    </exec>
   </target>
 </project>
