@@ -6,8 +6,14 @@ jimgload is a fairly simple library for loading images (currently PNG or JPEG) i
 
 * libpng 1.2 or 1.6
 * libjpeg-turbo 1.3
+
+## Compile-Time Only
+
 * JNI
-* Python 2.7 (compile-time only)
+* Python 2.7
+* ant
+* Maven (only for `ant deploy`)
+* [Maven Ant Tasks](https://maven.apache.org/ant-tasks/index.html)
 
 # Building
 
