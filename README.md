@@ -52,7 +52,7 @@ Any improvements to the build system are VERY welcome.  I'd like the whole thing
 # Portability
 
 I want this to work on Linux, Windows, and OS X.  However, it currently only works on Linux.
-To fix this, additional cleverness will be needed in [jni/GNUmakefile](jni/GNUmakefile).  A separate makefile
+To fix this, additional cleverness will be needed in [jni/GNUmakefile.in](jni/GNUmakefile.in).  A separate makefile
 for Windows may also be necessary.  Or, perhaps using CMake would be a better idea.  I'm not sure.
 
 # License
