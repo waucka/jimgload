@@ -4,15 +4,24 @@ jimgload is a fairly simple library for loading images (currently PNG or JPEG) i
 
 # Dependencies
 
-* libpng 1.2
+* libpng 1.2 or 1.6
 * libjpeg-turbo 1.3
 * JNI
+* Python 2 (compile-time only)
 
 # Building
+
+IF YOU ARE USING ARCH LINUX: Arch does not have a critical symlink in the same directory as `jni.h`
+(in `/usr/lib/jvm/java-7-openjdk/include` on my system).  Basically, `jni.h` references `jni_md.h`,
+but it does so with quotes instead of angle brackets, and the directory `jni_md.h` is in (`include/linux`)
+probably isn't in your include path anyway.  So, you need a symlink to `jni_md.h` in the same
+directory as `jni.h`.
 
 Before you do anything else, you need to set `$JAVA_HOME`.  On a Debian/Ubuntu-type system, this
 is typically `/usr/lib/jvm/default-java`.  `$JAVA_HOME/include` is where the build system expects
 to find `jni.h`.
+
+Run `./configure.py`.  This will set up `jni/GNUmakefile` correctly.
 
 Run `ant -p` to see the list of targets.  Currently, these are:
 
